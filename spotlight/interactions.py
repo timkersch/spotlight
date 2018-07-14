@@ -257,11 +257,12 @@ class Interactions(object):
 			long_enough = sequences[:, -min_sequence_length] != 0
 			sequences = sequences[long_enough]
 			sequence_users = sequence_users[long_enough]
+			sequence_times = sequence_times[long_enough]
 
 		return (SequenceInteractions(sequences,
 		                             user_ids=sequence_users,
 		                             num_items=self.num_items,
-		                             timestamps=timestamps))
+		                             timestamps=sequence_times))
 
 
 class SequenceInteractions(object):
@@ -289,6 +290,7 @@ class SequenceInteractions(object):
 	             sequences,
 	             user_ids=None, num_items=None, timestamps=None):
 
+		assert sequences.shape[0] == user_ids.shape[0] == timestamps.shape[0]
 		self.sequences = sequences
 		self.user_ids = user_ids
 		self.timestamps = timestamps
