@@ -264,6 +264,7 @@ class Interactions(object):
             sequences = sequences[long_enough]
             sequence_users = sequence_users[long_enough]
             sequence_times = sequence_times[long_enough]
+            sequence_weights = sequence_weights[long_enough]
 
         return (SequenceInteractions(sequences,
                                      user_ids=sequence_users,
