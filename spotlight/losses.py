@@ -15,7 +15,7 @@ import torch.nn.functional as F
 from spotlight.torch_utils import assert_no_grad
 
 
-def pointwise_loss(positive_predictions, negative_predictions, mask=None):
+def pointwise_loss(positive_predictions, negative_predictions, mask=None, weights=None):
     """
     Logistic loss function.
 
@@ -47,10 +47,13 @@ def pointwise_loss(positive_predictions, negative_predictions, mask=None):
         loss = loss * mask
         return loss.sum() / mask.sum()
 
+    if weights is not None:
+        loss = loss * weights
+
     return loss.mean()
 
 
-def bpr_loss(positive_predictions, negative_predictions, mask=None):
+def bpr_loss(positive_predictions, negative_predictions, mask=None, weights=None):
     """
     Bayesian Personalised Ranking [1]_ pairwise loss function.
 
@@ -87,10 +90,13 @@ def bpr_loss(positive_predictions, negative_predictions, mask=None):
         loss = loss * mask
         return loss.sum() / mask.sum()
 
+    if weights is not None:
+        loss = loss * weights
+
     return loss.mean()
 
 
-def hinge_loss(positive_predictions, negative_predictions, mask=None):
+def hinge_loss(positive_predictions, negative_predictions, mask=None, weights=None):
     """
     Hinge pairwise loss function.
 
@@ -121,10 +127,13 @@ def hinge_loss(positive_predictions, negative_predictions, mask=None):
         loss = loss * mask
         return loss.sum() / mask.sum()
 
+    if weights is not None:
+        loss = loss * weights
+
     return loss.mean()
 
 
-def adaptive_hinge_loss(positive_predictions, negative_predictions, mask=None):
+def adaptive_hinge_loss(positive_predictions, negative_predictions, mask=None, weights=None):
     """
     Adaptive hinge pairwise loss function. Takes a set of predictions
     for implicitly negative items, and selects those that are highest,
@@ -163,7 +172,7 @@ def adaptive_hinge_loss(positive_predictions, negative_predictions, mask=None):
 
     highest_negative_predictions, _ = torch.max(negative_predictions, 0)
 
-    return hinge_loss(positive_predictions, highest_negative_predictions.squeeze(), mask=mask)
+    return hinge_loss(positive_predictions, highest_negative_predictions.squeeze(), mask=mask, weights=weights)
 
 
 def regression_loss(observed_ratings, predicted_ratings):
