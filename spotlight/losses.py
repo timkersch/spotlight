@@ -125,6 +125,8 @@ def hinge_loss(positive_predictions, negative_predictions, mask=None, weights=No
     if mask is not None:
         mask = mask.float()
         loss = loss * mask
+        if weights is not None:
+            loss = loss * weights.view(-1, 1)
         return loss.sum() / mask.sum()
 
     if weights is not None:
