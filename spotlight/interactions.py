@@ -251,7 +251,7 @@ class Interactions(object):
 
         sequences = np.zeros((num_subsequences, max_sequence_length), dtype=np.int32)
         sequence_users = np.empty(num_subsequences, dtype=np.int32)
-        sequence_times = np.empty(num_subsequences, dtype=np.float64)
+        sequence_times = np.empty(num_subsequences, dtype=np.float32)
         sequence_weights = np.empty(num_subsequences, dtype=np.float32)
         for i, (uid, timestamp, weight, seq) in enumerate(_generate_sequences(user_ids, item_ids, timestamps, weights, indices, max_sequence_length, step_size)):
             sequences[i][-len(seq):] = seq
