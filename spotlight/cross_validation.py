@@ -9,11 +9,13 @@ from sklearn.utils import murmurhash3_32
 from spotlight.interactions import Interactions
 
 
-def _index_or_none(array, shuffle_index):
+def _index_or_none(array, shuffle_index, mask=None):
 
     if array is None:
         return None
     else:
+        if mask is not None:
+            array = array[mask]
         return array[shuffle_index]
 
 
@@ -105,6 +107,34 @@ def random_train_test_split(interactions,
                                                   test_idx),
                         weights=_index_or_none(interactions.weights,
                                                test_idx),
+                        num_users=interactions.num_users,
+                        num_items=interactions.num_items)
+
+    return train, test
+
+
+def time_based_train_test_split(interactions, test_percentage=0.2):
+    assert interactions.timestamps is not None
+
+    cutoff = int((1.0 - test_percentage) * len(interactions))
+
+    indices = np.argsort(interactions.timestamps)
+
+    train_idx = slice(None, cutoff)
+    test_idx = slice(cutoff, None)
+
+    train = Interactions(interactions.user_ids[indices][train_idx],
+                         interactions.item_ids[indices][train_idx],
+                         ratings=_index_or_none(interactions.ratings, train_idx, indices),
+                         timestamps=_index_or_none(interactions.timestamps, train_idx, indices),
+                         weights=_index_or_none(interactions.weights, train_idx, indices),
+                         num_users=interactions.num_users,
+                         num_items=interactions.num_items)
+    test = Interactions(interactions.user_ids[indices][test_idx],
+                        interactions.item_ids[indices][test_idx],
+                        ratings=_index_or_none(interactions.ratings, test_idx, indices),
+                        timestamps=_index_or_none(interactions.timestamps, test_idx, indices),
+                        weights=_index_or_none(interactions.weights, test_idx, indices),
                         num_users=interactions.num_users,
                         num_items=interactions.num_items)
 
