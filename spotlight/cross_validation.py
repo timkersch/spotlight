@@ -113,7 +113,7 @@ def random_train_test_split(interactions,
     return train, test
 
 
-def time_based_train_test_split(interactions, test_percentage=0.2):
+def time_based_train_test_split(interactions, test_percentage=0.2, test_drop_unknown=True):
     assert interactions.timestamps is not None
 
     cutoff = int((1.0 - test_percentage) * len(interactions))
@@ -130,11 +130,23 @@ def time_based_train_test_split(interactions, test_percentage=0.2):
                          weights=_index_or_none(interactions.weights, train_idx, indices),
                          num_users=interactions.num_users,
                          num_items=interactions.num_items)
-    test = Interactions(interactions.user_ids[indices][test_idx],
-                        interactions.item_ids[indices][test_idx],
-                        ratings=_index_or_none(interactions.ratings, test_idx, indices),
-                        timestamps=_index_or_none(interactions.timestamps, test_idx, indices),
-                        weights=_index_or_none(interactions.weights, test_idx, indices),
+
+    unkown_item_ids = np.setdiff1d(interactions.item_ids[indices][test_idx], interactions.item_ids[indices][train_idx])
+
+    if test_drop_unknown:
+        mask = np.empty(interactions.item_ids[indices][test_idx].shape[0], dtype=bool)
+        i = 0
+        for x in np.nditer(interactions.item_ids[indices][test_idx]):
+            mask[i] = not np.any(unkown_item_ids == x)
+            i += 1
+    else:
+        mask = np.ones(interactions.item_ids[indices][test_idx].shape[0], dtype=bool)
+
+    test = Interactions(interactions.user_ids[indices][test_idx][mask],
+                        interactions.item_ids[indices][test_idx][mask],
+                        ratings=_index_or_none(_index_or_none(interactions.ratings, test_idx, indices), mask),
+                        timestamps=_index_or_none(_index_or_none(interactions.timestamps, test_idx, indices), mask),
+                        weights=_index_or_none(_index_or_none(interactions.weights, test_idx, indices), mask),
                         num_users=interactions.num_users,
                         num_items=interactions.num_items)
 
